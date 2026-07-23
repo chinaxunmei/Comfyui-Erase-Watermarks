@@ -1,0 +1,1718 @@
+{
+  "id": "3b068a6e-a744-4999-bf28-65e4a534ffb8",
+  "revision": 0,
+  "last_node_id": 348,
+  "last_link_id": 932,
+  "nodes": [
+    {
+      "id": 10,
+      "type": "PreviewImage",
+      "pos": [
+        -9827.07404564398,
+        -1572.857772178845
+      ],
+      "size": [
+        406.5408089153552,
+        413.45881745026645
+      ],
+      "flags": {},
+      "order": 22,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 909
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.26.0",
+        "Node name for S&R": "PreviewImage",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 11,
+      "type": "MarkdownNote",
+      "pos": [
+        -9067.496824965237,
+        -350.7378964905732
+      ],
+      "size": [
+        651.8190101874455,
+        561.8167933062375
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "去除图像内嵌隐形水印，包含 SynthID 隐形水印。",
+      "properties": {
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "## Remove Invisible Watermark / SynthID (ERAW)\n\n仅移除不可见水印内容。\n\n基于 SDXL 扩散重建技术清除 SynthID 像素级隐形水印，同时依托 Canny ControlNet 保留图像文字、人脸结构完整性。该节点需额外配置 GPU/ML 运行环境。\n\n`strength` 参数说明：默认 `--strength 0.1` 即可有效去除隐形水印且视觉无变化；若遇顽固残留，可逐步提高至 `0.25~0.3`，但需注意图像细节可能产生轻微变化。建议从低值开始尝试。\n\n\n## 节点参数详细说明\n\n| 序号 | 参数名称                                | 功能说明                                                     |    默认值    | 参考范围值                                                   | 推荐尝试方向                                                 |\n| :--: | :-------------------------------------- | :----------------------------------------------------------- | :----------: | :----------------------------------------------------------- | :----------------------------------------------------------- |\n|  1   | **image** (输入图像)                    | 接入需要清除隐形水印的目标图像。                             |   外部接入   | 任意图像张量                                                 | 接入待处理的目标图像                                         |\n|  2   | **sdxl_model** (SDXL 模型)              | 接入 ComfyUI 的 SDXL 基础主模型，提供核心去噪重构能力。      |   外部接入   | SDXL 架构模型                                                | 推荐：`stable-diffusion-xl-base-1.0`                         |\n|  3   | **clip** (文本编码器)                   | 接入 CLIP 模型，用于编码去水印时注入的安全提示词。           |   外部接入   | CLIP 模型                                                    | 接入与 SDXL 匹配的 CLIP 模型                                 |\n|  4   | **vae** (自编码器)                      | 接入 VAE 模型，负责图像像素空间与潜空间的互转。              |   外部接入   | VAE 模型                                                     | 推荐：`sdxl_vae_fp16_fix`（修复版）                          |\n|  5   | **controlnet_model** (ControlNet 模型)  | 接入结构控制模型（如 Canny），用于在去水印时精准锁定原图轮廓与细节。 |   外部接入   | ControlNet 模型                                              | **推荐：**`xinsir/controlnet-canny-sdxl-1.0`（V1 版本）      |\n|  6   | **pipeline** (管线架构)                 | 选择底层重构所使用的架构模式。                               | `controlnet` | `controlnet`, `sdxl`                                         | **推荐 `controlnet`**（最大限度保护原图结构）                |\n|  7   | **strength** (重绘强度)                 | 扩散去噪过程中的降噪幅度，决定对原图隐形水印的破坏和修改程度。 |    `0.1`     | `0.0 ~ 1.0`                                                  | 建议从 `0.04` 起逐步上调。过低水印残留，过高结构变形。保脸场景建议控制在 `0.15` 以内。 |\n|  8   | **steps** (推理步数)                    | 扩散采样过程中的迭代计算步数。                               |     `30`     | `1 ~ 200`                                                    | `20 ~ 40` 步为效率与效果的平衡区间，可依效果微调。           |\n|  9   | **guidance_scale** (CFG 强度)           | 提示词引导强度，影响画面贴合提示词的程度。                   |    `7.5`     | `0.0 ~ 20.0`                                                 | 建议从 `7.5` 起步，保脸需求可适当降低（如 `5.0`）。过高可能导致画面过饱和。 |\n|  10  | **scheduler_name** (采样器)             | 控制去噪过程中噪声预测的算法。不同采样器影响速度、收敛性及细节保留。 |   `euler`    | 全部 ComfyUI 内置采样器                                      | **保脸优先**：`euler` / `dpmpp_2m`<br>**速度优先**：`lcm`（配合低步数）<br>**追求细节**：`dpmpp_2m_sde`（特征可能轻微变化） |\n|  11  | **scheduler** (调度器)                  | 控制采样过程中噪声衰减的节奏（步长调度策略）。               |   `simple`   | `normal`, `simple`, `karras`, `sgm_uniform`, `exponential` 等 | **通用推荐**：`normal` 或 `simple`<br>**锐利细节**：`karras`<br>**快速收敛**：`sgm_uniform` 或 `exponential` |\n|  12  | **seed** (随机种子)                     | 控制采样噪声分布的随机种子。                                 |     随机     | `0 ~ 最大整数`                                               | 固定种子便于对比参数变化效果。                               |\n|  13  | **control_after_generate** (生成后控制) | 每次执行后种子的更新策略。                                   | `randomize`  | `fixed`, `increment`, `decrement`, `randomize`               | **调试推荐 `fixed`**，固定种子便于控制变量反复测试。         |\n|  14  | **device** (运行设备)                   | 指定模型计算运行的硬件处理器。                               |    `auto`    | `auto`, `cuda`, `mps`, `cpu`                                 | **推荐 `cuda`**（NVIDIA 显卡硬件加速）                       |\n|  15  | **controlnet_scale** (控制权重)         | ControlNet 对图像结构的施加权重。                            |    `1.00`    | `0.0 ~ 2.0`                                                  | `0.8 ~ 1.0` 为常用区间，可依效果微调。                       |\n|  16  | **humanize** (人性化微调)               | 引入微小随机性扰动，打破纯 AI 生成的机械感。                 |    `0.0`     | `0.0 ~ 10.0`                                                 | 去水印任务建议保持为 `0.0`，防止引入额外噪点。               |\n|  17  | **unsharp** (锐化强度)                  | 对输出图像执行的边缘锐化滤镜强度。                           |    `0.0`     | `0.0 ~ 3.0`                                                  | 推荐 `0.0 ~ 0.2`，保持画面自然，避免白边。                   |\n|  18  | **max_resolution** (最大分辨率)         | 处理时的最大分辨率限制（`0` 表示不限制）。                   |     `0`      | `0 ~ 8192`                                                   | **推荐 `0`**（保留原图尺寸）                                 |\n|  19  | **min_resolution** (最小分辨率)         | 处理时的最小分辨率下限。                                     |    `1024`    | `0 ~ 8192`                                                   | **推荐 `1024`**（适配 SDXL 标准训练分辨率）                  |\n|  20  | **adaptive_polish** (自适应抛光)        | 是否开启自适应平滑抛光，修复可能存在的局部瑕疵。             |    `true`    | `true`, `false`                                              | **推荐 `true`**，使画面更自然干净。                          |\n|  21  | **upscaler** (放大算法)                 | 尺寸缩放或对齐时使用的插值重采样算法。                       |  `lanczos`   | `lanczos`, `esrgan`                                          | **推荐 `lanczos`**（速度快且能维持较好的像素边缘）           |"
+      ],
+      "color": "#c09430",
+      "bgcolor": "rgba(24,24,27,.9)"
+    },
+    {
+      "id": 12,
+      "type": "MarkdownNote",
+      "pos": [
+        -9489.108052862108,
+        -2057.695410265717
+      ],
+      "size": [
+        449.9915633707096,
+        157.01732823251268
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "检测可见水印(RAIW)",
+      "properties": {
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "## 检测输入图像中各类水印的识别置信度。输出文本检测报告、`detected` 布尔检测结果、最优置信度数值以及识别到的水印标识。"
+      ],
+      "color": "#c09430",
+      "bgcolor": "rgba(24,24,27,.9)"
+    },
+    {
+      "id": 13,
+      "type": "MarkdownNote",
+      "pos": [
+        -9377.291711894608,
+        -1567.5088709440217
+      ],
+      "size": [
+        468.0355539991979,
+        171.48676521071434
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "移除可见水印(RAIW)",
+      "properties": {
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "## 移除 AI 生成图像中的常见可见水印（如某包/某梦等 AI 生成文字标识、星光水印、品牌标识等）。开启 mark = auto 可自动检测并移除图像中置信度最高的水印。该节点仅依赖 OpenCV（cv2）运行，无需 GPU 加速，适合轻量级快速处理场景。"
+      ],
+      "color": "#c09430",
+      "bgcolor": "rgba(24,24,27,.9)"
+    },
+    {
+      "id": 16,
+      "type": "MarkdownNote",
+      "pos": [
+        -9048.032843971438,
+        -974.6911178714228
+      ],
+      "size": [
+        504.35908794951865,
+        224.371505656375
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "遮罩擦除(支持任意元素) (RAIW)",
+      "properties": {
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "# 对 `MASK` 蒙版覆盖的图像区域进行图像修补填充。\n# 强烈推荐使用lama_fp32.onnx模型（速度快且效果好）。\n# 支持两种后端：\n## cv2 后端（运行速度快、无额外依赖）、\n## lama 后端（基于 onnxruntime 部署的大模型 LaMa，修补画质更佳）。"
+      ],
+      "color": "#c09430",
+      "bgcolor": "rgba(24,24,27,.9)"
+    },
+    {
+      "id": 17,
+      "type": "SaveImage",
+      "pos": [
+        -9528.578041665189,
+        -982.1949501805093
+      ],
+      "size": [
+        437.9426315658584,
+        511.2015071449298
+      ],
+      "flags": {},
+      "order": 24,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 915
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.26.0",
+        "Node name for S&R": "SaveImage",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        "移除遮罩区域水印_"
+      ]
+    },
+    {
+      "id": 24,
+      "type": "MarkdownNote",
+      "pos": [
+        -10996.059646116773,
+        -2107.8051868217062
+      ],
+      "size": [
+        661.5431760596421,
+        407.14031677995354
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "清除水印4个节点总结",
+      "properties": {
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "# ComfyUI-remove-ai-watermarks\n# 节点功能（Nodes）\n\n| 节点（Node）                                    | 功能说明（What it does）                                     |\n| :---------------------------------------------- | :----------------------------------------------------------- |\n| **Remove Visible Watermark (ERAW)**             | 移除 AI 生成图像中的常见可见水印（如某包 / 某梦等 AI 生成文字标识、星光水印、品牌标识等）。开启 `mark = auto` 可自动检测并移除图像中置信度最高的水印。该节点仅依赖 OpenCV（cv2）运行，无需 GPU 加速，适合轻量级快速处理场景。 |\n| **Detect Visible Watermark (ERAW)**             | 检测输入图像中各类水印的识别置信度。输出文本检测报告、`detected` 布尔检测结果、最优置信度数值以及识别到的水印标识。 |\n| **Erase Region (ERAW)**                         | 对 `MASK` 蒙版覆盖的图像区域进行图像修补填充。支持两种后端：cv2 后端（运行速度快、无额外依赖）、lama 后端（基于 onnxruntime 部署的大模型 LaMa，修补画质更佳）。 |\n| **Remove Invisible Watermark / SynthID (ERAW)** | 基于 SDXL 扩散重建技术清除 SynthID 像素级隐形水印，同时依托 canny ControlNet 保留图像文字、人脸结构完整性。该节点需额外配置 GPU/ML 运行环境。 |\n\n\n\n# 总结选择建议\n\n- **若要去除 Logo、时间戳、人像瑕疵**：首选 **LaMa**。它是区域修复的行业标准，能够确保未被选中的区域完全不受影响，保留原始的画质细节。  \n- **若要去除 SynthID 等防伪隐形水印**：必须使用 **SDXL ControlNet**。这是目前处理隐形水印唯一有效的技术手段，通过重新扩散（Regeneration）来移除隐藏的嵌入信号。"
+      ],
+      "color": "#c09430",
+      "bgcolor": "rgba(24,24,27,.9)"
+    },
+    {
+      "id": 81,
+      "type": "ControlNetLoader",
+      "pos": [
+        -10564.692878686708,
+        8.118426006606278
+      ],
+      "size": [
+        638.5443028850608,
+        114.28798473529588
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CONTROL_NET",
+          "type": "CONTROL_NET",
+          "links": [
+            921
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.26.0",
+        "Node name for S&R": "ControlNetLoader",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        "xinsir\\controlnet-canny-sdxl-1.0\\xinsir-controlnet-canny-sdxl-v1.safetensors"
+      ]
+    },
+    {
+      "id": 183,
+      "type": "AV_VAELoader",
+      "pos": [
+        -10455.926673039405,
+        -167.23644754004968
+      ],
+      "size": [
+        526.4576878622665,
+        116.27052507448934
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            920
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-art-venture",
+        "ver": "210dc072b1f103f91be18a33bdeb13ab315aaae5",
+        "Node name for S&R": "AV_VAELoader",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        "sdxl-vae\\sdxl_vae_fp16_fix.safetensors",
+        "None"
+      ]
+    },
+    {
+      "id": 184,
+      "type": "CheckpointLoaderSimple",
+      "pos": [
+        -10600.852680124037,
+        -325.86081939187306
+      ],
+      "size": [
+        693.5194318111174,
+        107.34652775555921
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            919
+          ]
+        },
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            922
+          ]
+        },
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": []
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.26.0",
+        "Node name for S&R": "CheckpointLoaderSimple",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        "sdxl\\stable-diffusion-xl-base-1.0\\sd_xl_base_1.0.safetensors"
+      ]
+    },
+    {
+      "id": 203,
+      "type": "SaveImage",
+      "pos": [
+        -9531.86076272725,
+        -332.12420243808356
+      ],
+      "size": [
+        437.9426315658584,
+        511.2015071449298
+      ],
+      "flags": {},
+      "order": 27,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 917
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.26.0",
+        "Node name for S&R": "SaveImage",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        "移除SynthID隐形水印_"
+      ]
+    },
+    {
+      "id": 218,
+      "type": "ResizeImagesByLongerEdge",
+      "pos": [
+        -10901.253568021575,
+        -311.99944499778223
+      ],
+      "size": [
+        270,
+        58
+      ],
+      "flags": {},
+      "order": 25,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 899
+        },
+        {
+          "name": "longer_edge",
+          "type": "INT",
+          "widget": {
+            "name": "longer_edge"
+          },
+          "link": 767
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            918
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.26.0",
+        "Node name for S&R": "ResizeImagesByLongerEdge",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        2688
+      ]
+    },
+    {
+      "id": 259,
+      "type": "MathExpression|pysssss",
+      "pos": [
+        -10774.49507599821,
+        -116.93901396321911
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 20,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "a",
+          "name": "a",
+          "shape": 7,
+          "type": "INT,FLOAT,IMAGE,LATENT",
+          "link": 763
+        },
+        {
+          "label": "b",
+          "name": "b",
+          "shape": 7,
+          "type": "INT,FLOAT,IMAGE,LATENT",
+          "link": 762
+        },
+        {
+          "label": "c",
+          "name": "c",
+          "shape": 7,
+          "type": "INT,FLOAT,IMAGE,LATENT",
+          "link": null
+        },
+        {
+          "label": "表达式",
+          "name": "expression",
+          "type": "INT,FLOAT,IMAGE,LATENT",
+          "widget": {
+            "name": "expression"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "label": "整数",
+          "name": "INT",
+          "type": "INT",
+          "links": [
+            767
+          ]
+        },
+        {
+          "label": "浮点",
+          "name": "FLOAT",
+          "type": "FLOAT",
+          "links": null
+        }
+      ],
+      "title": "数学表达式",
+      "properties": {
+        "cnr_id": "comfyui-custom-scripts",
+        "ver": "609f3afaa74b2f88ef9ce8d939626065e3247469",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        "floor(max(a, b) / 64) * 64"
+      ]
+    },
+    {
+      "id": 262,
+      "type": "GetImageSize",
+      "pos": [
+        -10956.805308652196,
+        -121.20155326751022
+      ],
+      "size": [
+        159.9,
+        124
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "图像",
+          "name": "image",
+          "type": "IMAGE",
+          "link": 898
+        }
+      ],
+      "outputs": [
+        {
+          "label": "宽度",
+          "name": "width",
+          "type": "INT",
+          "links": [
+            763
+          ]
+        },
+        {
+          "label": "高度",
+          "name": "height",
+          "type": "INT",
+          "links": [
+            762
+          ]
+        },
+        {
+          "name": "batch_size",
+          "type": "INT",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.26.0",
+        "Node name for S&R": "GetImageSize",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 284,
+      "type": "MarkdownNote",
+      "pos": [
+        -10915.436100872095,
+        -25.199693989762732
+      ],
+      "size": [
+        283.9761227163108,
+        133.48372010805497
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "数学表达式",
+      "properties": {
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "# 该表达式用于将图像长边向下对齐到最近的64倍数（不超过原尺寸），确保满足VAE编码要求。"
+      ],
+      "color": "#c09430",
+      "bgcolor": "rgba(24,24,27,.9)"
+    },
+    {
+      "id": 316,
+      "type": "LoadLaMaONNXModel",
+      "pos": [
+        -10269.875114437176,
+        -931.8705897551665
+      ],
+      "size": [
+        287.85710769759714,
+        58
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "模型名称",
+          "name": "model_name",
+          "type": "COMBO",
+          "widget": {
+            "name": "model_name"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "lama_model",
+          "type": "LAMA_MODEL",
+          "links": [
+            923
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "remove-ai-watermarks",
+        "ver": "de976362b65b355c4af8f4af48f765111f2a2787",
+        "Node name for S&R": "LoadLaMaONNXModel",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        "lama_fp32.onnx"
+      ]
+    },
+    {
+      "id": 320,
+      "type": "LoadImage",
+      "pos": [
+        -10976.899340965607,
+        -1568.5556640496031
+      ],
+      "size": [
+        603.0551627303812,
+        1039.9311338879188
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            898,
+            899,
+            914,
+            927,
+            928
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            913
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.26.0",
+        "Node name for S&R": "LoadImage",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        },
+        "image": "clipspace/clipspace-painted-masked-1784775639974.png [input]"
+      },
+      "widgets_values": [
+        "clipspace/clipspace-painted-masked-1784775639974.png [input]",
+        "image"
+      ]
+    },
+    {
+      "id": 330,
+      "type": "ERAWRemoveVisibleWatermark",
+      "pos": [
+        -10259.315998226808,
+        -1568.0743911827572
+      ],
+      "size": [
+        397.136328125,
+        102
+      ],
+      "flags": {},
+      "order": 18,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "图像",
+          "name": "image",
+          "type": "IMAGE",
+          "link": 928
+        },
+        {
+          "label": "水印类型",
+          "name": "mark",
+          "type": "COMBO",
+          "widget": {
+            "name": "mark"
+          },
+          "link": null
+        },
+        {
+          "label": "修复",
+          "name": "inpaint",
+          "shape": 7,
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "inpaint"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "label": "图像",
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            909
+          ]
+        },
+        {
+          "label": "信息",
+          "name": "info",
+          "type": "STRING",
+          "links": [
+            932
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-erase-watermarks",
+        "ver": "de976362b65b355c4af8f4af48f765111f2a2787",
+        "Node name for S&R": "ERAWRemoveVisibleWatermark",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        "auto",
+        true
+      ]
+    },
+    {
+      "id": 331,
+      "type": "ERAWDetectVisibleWatermark",
+      "pos": [
+        -10263.07022671767,
+        -2057.695410265717
+      ],
+      "size": [
+        352.1758218234248,
+        103.4853854122548
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "图像",
+          "name": "image",
+          "type": "IMAGE",
+          "link": 927
+        }
+      ],
+      "outputs": [
+        {
+          "label": "报告",
+          "name": "report",
+          "type": "STRING",
+          "links": [
+            931
+          ]
+        },
+        {
+          "label": "是否检测到",
+          "name": "detected",
+          "type": "BOOLEAN",
+          "links": null
+        },
+        {
+          "label": "置信度",
+          "name": "confidence",
+          "type": "FLOAT",
+          "links": null
+        },
+        {
+          "label": "水印标识",
+          "name": "mark",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "title": "检测可见水印 (ERAW)",
+      "properties": {
+        "cnr_id": "comfyui-erase-watermarks",
+        "ver": "de976362b65b355c4af8f4af48f765111f2a2787",
+        "Node name for S&R": "ERAWDetectVisibleWatermark",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 332,
+      "type": "ERAWEraseRegion",
+      "pos": [
+        -9936.679846308243,
+        -976.9851283070869
+      ],
+      "size": [
+        366.3128052697342,
+        179.33002398380336
+      ],
+      "flags": {},
+      "order": 19,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "图像",
+          "name": "image",
+          "type": "IMAGE",
+          "link": 914
+        },
+        {
+          "label": "遮罩",
+          "name": "mask",
+          "type": "MASK",
+          "link": 913
+        },
+        {
+          "name": "lama_model",
+          "shape": 7,
+          "type": "LAMA_MODEL",
+          "link": 923
+        },
+        {
+          "label": "Backend",
+          "name": "backend",
+          "shape": 7,
+          "type": "COMBO",
+          "widget": {
+            "name": "backend"
+          },
+          "link": null
+        },
+        {
+          "label": "遮罩扩展",
+          "name": "dilate",
+          "shape": 7,
+          "type": "INT",
+          "widget": {
+            "name": "dilate"
+          },
+          "link": null
+        },
+        {
+          "label": "CV2 算法",
+          "name": "cv2_method",
+          "shape": 7,
+          "type": "COMBO",
+          "widget": {
+            "name": "cv2_method"
+          },
+          "link": null
+        },
+        {
+          "label": "CV2 半径",
+          "name": "cv2_radius",
+          "shape": 7,
+          "type": "INT",
+          "widget": {
+            "name": "cv2_radius"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "label": "图像",
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            915
+          ]
+        }
+      ],
+      "title": "遮罩擦除(支持任意元素) (ERAW)",
+      "properties": {
+        "cnr_id": "comfyui-erase-watermarks",
+        "ver": "de976362b65b355c4af8f4af48f765111f2a2787",
+        "Node name for S&R": "ERAWEraseRegion",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        "lama",
+        3,
+        "telea",
+        6
+      ]
+    },
+    {
+      "id": 333,
+      "type": "ERAWRemoveInvisibleWatermark",
+      "pos": [
+        -9880.002092320688,
+        -326.4057142567715
+      ],
+      "size": [
+        317.38046875,
+        498
+      ],
+      "flags": {},
+      "order": 26,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "图像",
+          "name": "image",
+          "type": "IMAGE",
+          "link": 918
+        },
+        {
+          "label": "SDXL 模型",
+          "name": "sdxl_model",
+          "type": "MODEL",
+          "link": 919
+        },
+        {
+          "label": "CLIP 模型",
+          "name": "clip",
+          "type": "CLIP",
+          "link": 922
+        },
+        {
+          "label": "VAE 模型",
+          "name": "vae",
+          "type": "VAE",
+          "link": 920
+        },
+        {
+          "label": "ControlNet模型",
+          "name": "controlnet_model",
+          "shape": 7,
+          "type": "CONTROL_NET",
+          "link": 921
+        },
+        {
+          "label": "管线架构",
+          "name": "pipeline",
+          "type": "COMBO",
+          "widget": {
+            "name": "pipeline"
+          },
+          "link": null
+        },
+        {
+          "label": "重绘强度",
+          "name": "strength",
+          "type": "FLOAT",
+          "widget": {
+            "name": "strength"
+          },
+          "link": null
+        },
+        {
+          "label": "采样步数",
+          "name": "steps",
+          "type": "INT",
+          "widget": {
+            "name": "steps"
+          },
+          "link": null
+        },
+        {
+          "label": "CFG强度",
+          "name": "guidance_scale",
+          "shape": 7,
+          "type": "FLOAT",
+          "widget": {
+            "name": "guidance_scale"
+          },
+          "link": null
+        },
+        {
+          "label": "采样器",
+          "name": "scheduler_name",
+          "shape": 7,
+          "type": "COMBO",
+          "widget": {
+            "name": "scheduler_name"
+          },
+          "link": null
+        },
+        {
+          "label": "调度器",
+          "name": "scheduler",
+          "shape": 7,
+          "type": "COMBO",
+          "widget": {
+            "name": "scheduler"
+          },
+          "link": null
+        },
+        {
+          "label": "随机种子",
+          "name": "seed",
+          "shape": 7,
+          "type": "INT",
+          "widget": {
+            "name": "seed"
+          },
+          "link": null
+        },
+        {
+          "label": "设备类型",
+          "name": "device",
+          "shape": 7,
+          "type": "COMBO",
+          "widget": {
+            "name": "device"
+          },
+          "link": null
+        },
+        {
+          "label": "ControlNet权重",
+          "name": "controlnet_scale",
+          "shape": 7,
+          "type": "FLOAT",
+          "widget": {
+            "name": "controlnet_scale"
+          },
+          "link": null
+        },
+        {
+          "label": "Humanize",
+          "name": "humanize",
+          "shape": 7,
+          "type": "FLOAT",
+          "widget": {
+            "name": "humanize"
+          },
+          "link": null
+        },
+        {
+          "label": "USM锐化",
+          "name": "unsharp",
+          "shape": 7,
+          "type": "FLOAT",
+          "widget": {
+            "name": "unsharp"
+          },
+          "link": null
+        },
+        {
+          "label": "最大分辨率限制",
+          "name": "max_resolution",
+          "shape": 7,
+          "type": "INT",
+          "widget": {
+            "name": "max_resolution"
+          },
+          "link": null
+        },
+        {
+          "label": "最小分辨率限制",
+          "name": "min_resolution",
+          "shape": 7,
+          "type": "INT",
+          "widget": {
+            "name": "min_resolution"
+          },
+          "link": null
+        },
+        {
+          "label": "自适应抛光",
+          "name": "adaptive_polish",
+          "shape": 7,
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "adaptive_polish"
+          },
+          "link": null
+        },
+        {
+          "label": "放大算法",
+          "name": "upscaler",
+          "shape": 7,
+          "type": "COMBO",
+          "widget": {
+            "name": "upscaler"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "label": "图像",
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            917
+          ]
+        }
+      ],
+      "title": "移除不可见水印 (ERAW)",
+      "properties": {
+        "cnr_id": "comfyui-erase-watermarks",
+        "ver": "de976362b65b355c4af8f4af48f765111f2a2787",
+        "Node name for S&R": "ERAWRemoveInvisibleWatermark",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        "controlnet",
+        0.1,
+        30,
+        7.5,
+        "euler",
+        "simple",
+        746935697139601,
+        "randomize",
+        "cuda",
+        1,
+        0,
+        0,
+        0,
+        1024,
+        true,
+        "lanczos"
+      ]
+    },
+    {
+      "id": 342,
+      "type": "Fast Groups Bypasser (rgthree)",
+      "pos": [
+        -8369.235370472497,
+        -2101.2055568246633
+      ],
+      "size": [
+        499.83077699383193,
+        88.24173873969494
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "label": "可选连接",
+          "name": "OPT_CONNECTION",
+          "type": "*"
+        }
+      ],
+      "properties": {
+        "matchColors": "",
+        "matchTitle": "检测可见水印",
+        "showNav": true,
+        "showAllGraphs": true,
+        "sort": "position",
+        "customSortAlphabet": "",
+        "toggleRestriction": "default",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.5.1"
+        },
+        "widget_ue_connectable": {}
+      },
+      "color": "#e8005d",
+      "bgcolor": "#820034"
+    },
+    {
+      "id": 343,
+      "type": "Fast Groups Bypasser (rgthree)",
+      "pos": [
+        -8369.054524937032,
+        -1612.3577602766004
+      ],
+      "size": [
+        499.83077699383193,
+        88.24173873969494
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "label": "可选连接",
+          "name": "OPT_CONNECTION",
+          "type": "*"
+        }
+      ],
+      "properties": {
+        "matchColors": "",
+        "matchTitle": "自动移除可见水印",
+        "showNav": true,
+        "showAllGraphs": true,
+        "sort": "position",
+        "customSortAlphabet": "",
+        "toggleRestriction": "default",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.5.1"
+        },
+        "widget_ue_connectable": {}
+      },
+      "color": "#e8005d",
+      "bgcolor": "#820034"
+    },
+    {
+      "id": 344,
+      "type": "Fast Groups Bypasser (rgthree)",
+      "pos": [
+        -8371.76528856001,
+        -1024.2344402147103
+      ],
+      "size": [
+        499.83077699383193,
+        88.24173873969494
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "label": "可选连接",
+          "name": "OPT_CONNECTION",
+          "type": "*"
+        }
+      ],
+      "properties": {
+        "matchColors": "",
+        "matchTitle": "遮罩擦除",
+        "showNav": true,
+        "showAllGraphs": true,
+        "sort": "position",
+        "customSortAlphabet": "",
+        "toggleRestriction": "default",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.5.1"
+        },
+        "widget_ue_connectable": {}
+      },
+      "color": "#e8005d",
+      "bgcolor": "#820034"
+    },
+    {
+      "id": 345,
+      "type": "Fast Groups Bypasser (rgthree)",
+      "pos": [
+        -8369.656897718452,
+        -392.7382931730523
+      ],
+      "size": [
+        499.83077699383193,
+        88.24173873969494
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "label": "可选连接",
+          "name": "OPT_CONNECTION",
+          "type": "*"
+        }
+      ],
+      "properties": {
+        "matchColors": "",
+        "matchTitle": "移除不可见水印",
+        "showNav": true,
+        "showAllGraphs": true,
+        "sort": "position",
+        "customSortAlphabet": "",
+        "toggleRestriction": "default",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.5.1"
+        },
+        "widget_ue_connectable": {}
+      },
+      "color": "#e8005d",
+      "bgcolor": "#820034"
+    },
+    {
+      "id": 346,
+      "type": "MarkdownNote",
+      "pos": [
+        -10237.248072057402,
+        -628.0397194574066
+      ],
+      "size": [
+        283.9761227163108,
+        133.48372010805497
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "必须绘制遮罩",
+      "properties": {
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "# 运行该组前先在水印图像上绘制遮罩并保存。"
+      ],
+      "color": "#c09430",
+      "bgcolor": "rgba(24,24,27,.9)"
+    },
+    {
+      "id": 347,
+      "type": "PreviewAny",
+      "pos": [
+        -9878.038613828348,
+        -2057.695410265717
+      ],
+      "size": [
+        369.7275445627256,
+        328.3038423589503
+      ],
+      "flags": {},
+      "order": 21,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "source",
+          "type": "*",
+          "link": 931
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {}
+        },
+        "cnr_id": "comfy-core",
+        "ver": "0.26.0",
+        "Node name for S&R": "PreviewAny"
+      },
+      "widgets_values": [
+        null,
+        null,
+        true
+      ]
+    },
+    {
+      "id": 348,
+      "type": "PreviewAny",
+      "pos": [
+        -10111.733715037577,
+        -1351.5460274711893
+      ],
+      "size": [
+        256.2554229959478,
+        181.80882739673575
+      ],
+      "flags": {},
+      "order": 23,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "source",
+          "type": "*",
+          "link": 932
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {}
+        },
+        "cnr_id": "comfy-core",
+        "ver": "0.26.0",
+        "Node name for S&R": "PreviewAny"
+      },
+      "widgets_values": [
+        null,
+        null,
+        false
+      ]
+    }
+  ],
+  "links": [
+    [
+      762,
+      262,
+      1,
+      259,
+      1,
+      "INT"
+    ],
+    [
+      763,
+      262,
+      0,
+      259,
+      0,
+      "INT"
+    ],
+    [
+      767,
+      259,
+      0,
+      218,
+      1,
+      "INT"
+    ],
+    [
+      898,
+      320,
+      0,
+      262,
+      0,
+      "IMAGE"
+    ],
+    [
+      899,
+      320,
+      0,
+      218,
+      0,
+      "IMAGE"
+    ],
+    [
+      909,
+      330,
+      0,
+      10,
+      0,
+      "IMAGE"
+    ],
+    [
+      913,
+      320,
+      1,
+      332,
+      1,
+      "MASK"
+    ],
+    [
+      914,
+      320,
+      0,
+      332,
+      0,
+      "IMAGE"
+    ],
+    [
+      915,
+      332,
+      0,
+      17,
+      0,
+      "IMAGE"
+    ],
+    [
+      917,
+      333,
+      0,
+      203,
+      0,
+      "IMAGE"
+    ],
+    [
+      918,
+      218,
+      0,
+      333,
+      0,
+      "IMAGE"
+    ],
+    [
+      919,
+      184,
+      0,
+      333,
+      1,
+      "MODEL"
+    ],
+    [
+      920,
+      183,
+      0,
+      333,
+      3,
+      "VAE"
+    ],
+    [
+      921,
+      81,
+      0,
+      333,
+      4,
+      "CONTROL_NET"
+    ],
+    [
+      922,
+      184,
+      1,
+      333,
+      2,
+      "CLIP"
+    ],
+    [
+      923,
+      316,
+      0,
+      332,
+      2,
+      "LAMA_MODEL"
+    ],
+    [
+      927,
+      320,
+      0,
+      331,
+      0,
+      "IMAGE"
+    ],
+    [
+      928,
+      320,
+      0,
+      330,
+      0,
+      "IMAGE"
+    ],
+    [
+      931,
+      331,
+      0,
+      347,
+      0,
+      "STRING"
+    ],
+    [
+      932,
+      330,
+      1,
+      348,
+      0,
+      "STRING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "单图上传区",
+      "bounding": [
+        -10996.899340965607,
+        -1646.5556640496031,
+        664.2596559204903,
+        1152.7745140217721
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "移除不可见水印 (ERAW)",
+      "bounding": [
+        -10998.963968800748,
+        -428.7378964905732,
+        2603.286154022957,
+        659.8167933062375
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 3,
+      "title": "遮罩擦除(支持任意元素) (ERAW)",
+      "bounding": [
+        -10289.875114437176,
+        -1060.1949501805093,
+        1893.3223773052305,
+        617.3652487681604
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 4,
+      "title": "自动移除可见水印 (ERAW)",
+      "bounding": [
+        -10279.315998226808,
+        -1650.857772178845,
+        1882.0032495118867,
+        547.6125135745183
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 5,
+      "title": "检测可见水印 (ERAW)自动生成摘要式报告",
+      "bounding": [
+        -10283.07022671767,
+        -2135.695410265717,
+        1884.1853231965652,
+        431.52399232055745
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ue_links": [],
+    "links_added_by_ue": [],
+    "ds": {
+      "scale": 0.39907415716726913,
+      "offset": [
+        12347.355198425767,
+        2444.8937597628774
+      ]
+    },
+    "frontendVersion": "1.45.19",
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

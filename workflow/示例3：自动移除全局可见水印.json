@@ -1,0 +1,310 @@
+{
+  "id": "ad1cd551-016f-45da-a1e4-b210283db4f8",
+  "revision": 0,
+  "last_node_id": 345,
+  "last_link_id": 936,
+  "nodes": [
+    {
+      "id": 13,
+      "type": "MarkdownNote",
+      "pos": [
+        -8765.780584672497,
+        -1538.354838652757
+      ],
+      "size": [
+        418.07438191549045,
+        214.37788849073763
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "移除可见水印(RAIW)",
+      "properties": {
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "## 移除 AI 生成图像中的常见可见水印（如某包/某梦等 AI 生成文字标识、星光水印、品牌标识等）。开启 mark = auto 可自动检测并移除图像中置信度最高的水印。该节点仅依赖 OpenCV（cv2）运行，无需 GPU 加速，适合轻量级快速处理场景。"
+      ],
+      "color": "#c09430",
+      "bgcolor": "rgba(24,24,27,.9)"
+    },
+    {
+      "id": 330,
+      "type": "ERAWRemoveVisibleWatermark",
+      "pos": [
+        -9868.254736481646,
+        -1546.746556178267
+      ],
+      "size": [
+        397.136328125,
+        102
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "图像",
+          "name": "image",
+          "type": "IMAGE",
+          "link": 936
+        },
+        {
+          "label": "水印类型",
+          "name": "mark",
+          "type": "COMBO",
+          "widget": {
+            "name": "mark"
+          },
+          "link": null
+        },
+        {
+          "label": "修复",
+          "name": "inpaint",
+          "shape": 7,
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "inpaint"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "label": "图像",
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            935
+          ]
+        },
+        {
+          "label": "信息",
+          "name": "info",
+          "type": "STRING",
+          "links": [
+            933
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-erase-watermarks",
+        "ver": "de976362b65b355c4af8f4af48f765111f2a2787",
+        "Node name for S&R": "ERAWRemoveVisibleWatermark",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        "auto",
+        true
+      ]
+    },
+    {
+      "id": 342,
+      "type": "PreviewAny",
+      "pos": [
+        -9594.64874968475,
+        -1374.7038562129512
+      ],
+      "size": [
+        357.6733063809879,
+        331.4034789376981
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "source",
+          "type": "*",
+          "link": 933
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.26.0",
+        "Node name for S&R": "PreviewAny",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "id": 344,
+      "type": "PreviewImage",
+      "pos": [
+        -9210.565025080583,
+        -1546.746556178267
+      ],
+      "size": [
+        415.72513261966196,
+        651.6698550139167
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 935
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.26.0",
+        "Node name for S&R": "PreviewImage",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 345,
+      "type": "LoadImage",
+      "pos": [
+        -10323.537685008429,
+        -1544.755942928561
+      ],
+      "size": [
+        401.3703461188761,
+        648.7086683459542
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            936
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.26.0",
+        "Node name for S&R": "LoadImage",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        "未标题-1.png",
+        "image"
+      ]
+    }
+  ],
+  "links": [
+    [
+      933,
+      330,
+      1,
+      342,
+      0,
+      "STRING"
+    ],
+    [
+      935,
+      330,
+      0,
+      344,
+      0,
+      "IMAGE"
+    ],
+    [
+      936,
+      345,
+      0,
+      330,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "水印图上传区",
+      "bounding": [
+        -10343.537685008429,
+        -1622.755942928561,
+        441.3703461188761,
+        746.7086683459542
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "自动移除可见水印 (ERAW)",
+      "bounding": [
+        -9888.254736481646,
+        -1624.746556178267,
+        1562.6219631330168,
+        750.3609981500429
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ue_links": [],
+    "links_added_by_ue": [],
+    "ds": {
+      "scale": 0.8769226950000005,
+      "offset": [
+        10680.47155699064,
+        1945.0790917367256
+      ]
+    },
+    "frontendVersion": "1.45.19",
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

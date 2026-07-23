@@ -1,0 +1,15 @@
+[project]
+name = "comfyui-erase-watermarks"
+description = "ComfyUI-Erase-Watermarks is a ComfyUI custom node package that removes visible and invisible watermarks (SynthID) in AI-generated images. It is heavily refactored and enhanced based on remove-ai-watermarks, with fully rewritten ComfyUI integration for a smoother, more controllable watermark removal workflow."
+version = "1.0.0"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+classifiers = ["Operating System :: OS Independent"]
+dependencies = ["remove-ai-watermarks>=0.10.1"]
+
+[project.urls]
+Repository = "https://github.com/chinaxunmei/Comfyui-Erase-Watermarks"
+
+[tool.comfy]
+PublisherId = "chinaxunmei"
+DisplayName = "Comfyui-Erase-Watermarks"

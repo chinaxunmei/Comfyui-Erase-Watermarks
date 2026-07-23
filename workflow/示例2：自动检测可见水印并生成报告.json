@@ -1,0 +1,252 @@
+{
+  "id": "189e0dd9-7e63-406d-a83a-b7ce6df1f40c",
+  "revision": 0,
+  "last_node_id": 339,
+  "last_link_id": 931,
+  "nodes": [
+    {
+      "id": 9,
+      "type": "PreviewAny",
+      "pos": [
+        -10162.658290857577,
+        -1366.295112276326
+      ],
+      "size": [
+        357.6733063809879,
+        331.4034789376981
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "source",
+          "type": "*",
+          "link": 910
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.26.0",
+        "Node name for S&R": "PreviewAny",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "id": 12,
+      "type": "MarkdownNote",
+      "pos": [
+        -9771.374199420163,
+        -1366.295112276326
+      ],
+      "size": [
+        525.2674394544392,
+        142.17426841790143
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "检测可见水印(RAIW)",
+      "properties": {
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "## 检测输入图像中各类水印的识别置信度。输出文本检测报告、`detected` 布尔检测结果、最优置信度数值以及识别到的水印标识。"
+      ],
+      "color": "#c09430",
+      "bgcolor": "rgba(24,24,27,.9)"
+    },
+    {
+      "id": 320,
+      "type": "LoadImage",
+      "pos": [
+        -11050,
+        -1366.295112276326
+      ],
+      "size": [
+        450.382790406984,
+        701.7196063106933
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            928
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": []
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.26.0",
+        "Node name for S&R": "LoadImage",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        },
+        "image": "clipspace/clipspace-painted-masked-1784768948010.png [input]"
+      },
+      "widgets_values": [
+        "未标题-1.png",
+        "image"
+      ]
+    },
+    {
+      "id": 331,
+      "type": "ERAWDetectVisibleWatermark",
+      "pos": [
+        -10548.444897737425,
+        -1366.295112276326
+      ],
+      "size": [
+        352.1758218234248,
+        103.4853854122548
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "图像",
+          "name": "image",
+          "type": "IMAGE",
+          "link": 928
+        }
+      ],
+      "outputs": [
+        {
+          "label": "报告",
+          "name": "report",
+          "type": "STRING",
+          "links": [
+            910
+          ]
+        },
+        {
+          "label": "是否检测到",
+          "name": "detected",
+          "type": "BOOLEAN",
+          "links": null
+        },
+        {
+          "label": "置信度",
+          "name": "confidence",
+          "type": "FLOAT",
+          "links": null
+        },
+        {
+          "label": "水印标识",
+          "name": "mark",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "title": "检测可见水印 (ERAW)",
+      "properties": {
+        "cnr_id": "comfyui-erase-watermarks",
+        "ver": "de976362b65b355c4af8f4af48f765111f2a2787",
+        "Node name for S&R": "ERAWDetectVisibleWatermark",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": []
+    }
+  ],
+  "links": [
+    [
+      910,
+      331,
+      0,
+      9,
+      0,
+      "STRING"
+    ],
+    [
+      928,
+      320,
+      0,
+      331,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "水印图上传区",
+      "bounding": [
+        -11070,
+        -1444.295112276326,
+        490.382790406984,
+        799.7196063106933
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "检测可见水印 (ERAW)自动生成摘要式报告",
+      "bounding": [
+        -10568.444897737425,
+        -1444.295112276326,
+        1342.3381377717014,
+        429.4034789376981
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ue_links": [],
+    "links_added_by_ue": [],
+    "ds": {
+      "scale": 0.9662978465034612,
+      "offset": [
+        11365.445667238977,
+        1668.6097620376604
+      ]
+    },
+    "frontendVersion": "1.45.19",
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

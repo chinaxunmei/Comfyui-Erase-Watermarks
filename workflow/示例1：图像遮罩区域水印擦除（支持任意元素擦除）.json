@@ -1,0 +1,430 @@
+{
+  "id": "3cc3a62b-5027-47b6-a847-a70fda6aa66d",
+  "revision": 0,
+  "last_node_id": 341,
+  "last_link_id": 929,
+  "nodes": [
+    {
+      "id": 16,
+      "type": "MarkdownNote",
+      "pos": [
+        -8966.37341715853,
+        -1117.7753193543813
+      ],
+      "size": [
+        504.35908794951865,
+        224.371505656375
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "遮罩擦除(支持任意元素) (RAIW)",
+      "properties": {
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "# 对 `MASK` 蒙版覆盖的图像区域进行图像修补填充。\n# 强烈推荐使用lama_fp32.onnx模型（速度快且效果好）。\n# 支持两种后端：\n## cv2 后端（运行速度快、无额外依赖）、\n## lama 后端（基于 onnxruntime 部署的大模型 LaMa，修补画质更佳）。"
+      ],
+      "color": "#c09430",
+      "bgcolor": "rgba(24,24,27,.9)"
+    },
+    {
+      "id": 17,
+      "type": "SaveImage",
+      "pos": [
+        -9460.181274156506,
+        -1119.207998785564
+      ],
+      "size": [
+        471.0374073939238,
+        692.4345426089228
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 915
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.26.0",
+        "Node name for S&R": "SaveImage",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        "移除遮罩区域水印_"
+      ]
+    },
+    {
+      "id": 316,
+      "type": "LoadLaMaONNXModel",
+      "pos": [
+        -10222.971468583228,
+        -1004.6894310324922
+      ],
+      "size": [
+        307.683203125,
+        58
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "模型名称",
+          "name": "model_name",
+          "type": "COMBO",
+          "widget": {
+            "name": "model_name"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "lama_model",
+          "type": "LAMA_MODEL",
+          "links": [
+            923
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "remove-ai-watermarks",
+        "ver": "de976362b65b355c4af8f4af48f765111f2a2787",
+        "Node name for S&R": "LoadLaMaONNXModel",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        "lama_fp32.onnx"
+      ]
+    },
+    {
+      "id": 320,
+      "type": "LoadImage",
+      "pos": [
+        -10719.245944085213,
+        -1119.207998785564
+      ],
+      "size": [
+        450.382790406984,
+        701.7196063106933
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            914
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            913
+          ]
+        }
+      ],
+      "title": "上传水印原图",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.26.0",
+        "Node name for S&R": "LoadImage",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        },
+        "image": "clipspace/clipspace-painted-masked-1784780037880.png [input]"
+      },
+      "widgets_values": [
+        "clipspace/clipspace-painted-masked-1784780037880.png [input]",
+        "image"
+      ]
+    },
+    {
+      "id": 332,
+      "type": "ERAWEraseRegion",
+      "pos": [
+        -9880.751729678135,
+        -1119.207998785564
+      ],
+      "size": [
+        391.9703125,
+        170
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "图像",
+          "name": "image",
+          "type": "IMAGE",
+          "link": 914
+        },
+        {
+          "label": "遮罩",
+          "name": "mask",
+          "type": "MASK",
+          "link": 913
+        },
+        {
+          "name": "lama_model",
+          "shape": 7,
+          "type": "LAMA_MODEL",
+          "link": 923
+        },
+        {
+          "label": "Backend",
+          "name": "backend",
+          "shape": 7,
+          "type": "COMBO",
+          "widget": {
+            "name": "backend"
+          },
+          "link": null
+        },
+        {
+          "label": "遮罩扩展",
+          "name": "dilate",
+          "shape": 7,
+          "type": "INT",
+          "widget": {
+            "name": "dilate"
+          },
+          "link": null
+        },
+        {
+          "label": "CV2 算法",
+          "name": "cv2_method",
+          "shape": 7,
+          "type": "COMBO",
+          "widget": {
+            "name": "cv2_method"
+          },
+          "link": null
+        },
+        {
+          "label": "CV2 半径",
+          "name": "cv2_radius",
+          "shape": 7,
+          "type": "INT",
+          "widget": {
+            "name": "cv2_radius"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "label": "图像",
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            915
+          ]
+        }
+      ],
+      "title": "遮罩擦除(支持任意元素) (ERAW)",
+      "properties": {
+        "cnr_id": "comfyui-erase-watermarks",
+        "ver": "de976362b65b355c4af8f4af48f765111f2a2787",
+        "Node name for S&R": "ERAWEraseRegion",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        "lama",
+        3,
+        "telea",
+        6
+      ]
+    },
+    {
+      "id": 340,
+      "type": "MarkdownNote",
+      "pos": [
+        -10212.8288691993,
+        -885.4998835170951
+      ],
+      "size": [
+        283.9761227163108,
+        133.48372010805497
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "必须绘制遮罩",
+      "properties": {
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "# 运行该组前先在水印图像上绘制遮罩并保存。"
+      ],
+      "color": "#c09430",
+      "bgcolor": "rgba(24,24,27,.9)"
+    },
+    {
+      "id": 341,
+      "type": "LoadImage",
+      "pos": [
+        -11226.339755131445,
+        -1111.1670455482852
+      ],
+      "size": [
+        450.382790406984,
+        701.7196063106933
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": []
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": []
+        }
+      ],
+      "title": "原图对照",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.26.0",
+        "Node name for S&R": "LoadImage",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        },
+        "image": "clipspace/clipspace-painted-masked-1784779943962.png [input]"
+      },
+      "widgets_values": [
+        "Sample_可见水印 (1).png",
+        "image"
+      ]
+    }
+  ],
+  "links": [
+    [
+      913,
+      320,
+      1,
+      332,
+      1,
+      "MASK"
+    ],
+    [
+      914,
+      320,
+      0,
+      332,
+      0,
+      "IMAGE"
+    ],
+    [
+      915,
+      332,
+      0,
+      17,
+      0,
+      "IMAGE"
+    ],
+    [
+      923,
+      316,
+      0,
+      332,
+      2,
+      "LAMA_MODEL"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "水印图上传区",
+      "bounding": [
+        -10739.245944085213,
+        -1197.207998785564,
+        490.382790406984,
+        794.7019913602617
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "遮罩擦除(支持任意元素) (ERAW)",
+      "bounding": [
+        -10242.971468583228,
+        -1197.207998785564,
+        1800.9571393742171,
+        790.4345426089228
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ue_links": [],
+    "links_added_by_ue": [],
+    "ds": {
+      "scale": 0.7247295000000009,
+      "offset": [
+        11463.296157574403,
+        1601.0899334841492
+      ]
+    },
+    "frontendVersion": "1.45.19",
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}
