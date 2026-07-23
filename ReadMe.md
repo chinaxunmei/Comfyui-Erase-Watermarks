@@ -15,8 +15,8 @@
 - [安装说明](#-安装说明)
 - [依赖环境](#-依赖环境)
 - [模型下载与存放](#-模型下载与存放)
-- [节点说明](#-节点说明)
 - [工作流程示例](#-工作流程示例)
+- [节点说明](#-节点说明)
 - [翻译支持](#-翻译支持)
 - [推荐一起安装的扩展](#-推荐一起安装的扩展)
 - [常见问题](#-常见问题)
@@ -209,6 +209,59 @@ modelscope download --model AI-ModelScope/sdxl-vae-fp16-fix sdxl.vae.safetensors
 
 ---
 
+## 🔄 工作流程示例
+
+### 示例 1：使用 LaMa ONNX 模型进行图像遮罩区域擦除（支持任意可见元素擦除）
+
+```
+[原始图像] ────────────────→ [区域擦除可见水印 (RAIW)] → [输出]
+[MASK 遮罩] ──────────────→          ↑
+                                    │
+[加载 LaMa ONNX 模型] ──→ [lama_model]
+```
+
+![Example Workflow 01](https://raw.githubusercontent.com/chinaxunmei/Comfyui-Erase-Watermarks/main/assets/Example-Workflow-01.png)
+
+
+
+> ##### **说明**：通过「加载 LaMa ONNX 模型」节点加载 `lama_fp32.onnx`，输出 `LAMA_MODEL` 对象连接到「区域擦除可见水印」的 `lama_model` 端口，实现 ONNX 推理加速。
+
+### 示例 2：自动检测AI可见水印（ERAW）
+
+![Example Workflow 02](https://raw.githubusercontent.com/chinaxunmei/Comfyui-Erase-Watermarks/main/assets/Example-Workflow-02.png)
+
+### 示例 3：自动移除AI可见水印（ERAW）
+
+![Example Workflow 03](https://raw.githubusercontent.com/chinaxunmei/Comfyui-Erase-Watermarks/main/assets/Example-Workflow-03.png)
+
+
+
+### 示例 4：移除不可见水印（ERAW）
+
+![Example Workflow 04](https://raw.githubusercontent.com/chinaxunmei/Comfyui-Erase-Watermarks/main/assets/Example-Workflow-04.png)
+
+> ### 注意：建议 64 倍数尺寸自动对齐
+
+在「移除不可见水印」节点前，建议添加 **「缩放图像（长边）」节点** + **「数学表达式」节点**，自动将图像长边对齐到 64 的倍数（满足 VAE 编码要求）：
+
+**数学表达式：**
+
+```
+floor(max(a, b) / 64) * 64
+```
+
+### 示例5 - 高级组合工作流：移除不可见水印 + 移除可见水印（推荐串联顺序）
+
+```
+[原始图像] → [移除不可见水印 (RAIW)] → [区域擦除可见水印 (RAIW)] → [输出]
+                                        ↑
+                                   [MASK 遮罩]
+```
+
+> **说明**：先处理不可见水印（全局重绘），再通过遮罩擦除可见水印（局部修复），既避免扩散模型放大修复痕迹，又保证遮罩区域已去除隐形水印。
+
+---
+
 ## 🧩 节点说明
 
 ### 1. 移除可见水印 (RAIW)
@@ -294,59 +347,6 @@ modelscope download --model AI-ModelScope/sdxl-vae-fp16-fix sdxl.vae.safetensors
 | `model_name` | COMBO | 自动   | 从 `models/lama/` 目录自动扫描所有 `.onnx` 文件 |
 
 **输出：** `(LAMA_MODEL,)` — 可直接连接到「区域擦除可见水印」的 `lama_model` 端口。
-
----
-
-## 🔄 工作流程示例
-
-### 示例 1：使用 LaMa ONNX 模型进行图像遮罩区域擦除（支持任意可见元素擦除）
-
-```
-[原始图像] ────────────────→ [区域擦除可见水印 (RAIW)] → [输出]
-[MASK 遮罩] ──────────────→          ↑
-                                    │
-[加载 LaMa ONNX 模型] ──→ [lama_model]
-```
-
-![Example Workflow 01](https://raw.githubusercontent.com/chinaxunmei/Comfyui-Erase-Watermarks/main/assets/Example-Workflow-01.png)
-
-
-
-> ##### **说明**：通过「加载 LaMa ONNX 模型」节点加载 `lama_fp32.onnx`，输出 `LAMA_MODEL` 对象连接到「区域擦除可见水印」的 `lama_model` 端口，实现 ONNX 推理加速。
-
-### 示例 2：自动检测AI可见水印（ERAW）
-
-![Example Workflow 02](https://raw.githubusercontent.com/chinaxunmei/Comfyui-Erase-Watermarks/main/assets/Example-Workflow-02.png)
-
-### 示例 3：自动移除AI可见水印（ERAW）
-
-![Example Workflow 03](https://raw.githubusercontent.com/chinaxunmei/Comfyui-Erase-Watermarks/main/assets/Example-Workflow-03.png)
-
-
-
-### 示例 4：移除不可见水印（ERAW）
-
-![Example Workflow 04](https://raw.githubusercontent.com/chinaxunmei/Comfyui-Erase-Watermarks/main/assets/Example-Workflow-04.png)
-
-> ### 注意：建议 64 倍数尺寸自动对齐
-
-在「移除不可见水印」节点前，建议添加 **「缩放图像（长边）」节点** + **「数学表达式」节点**，自动将图像长边对齐到 64 的倍数（满足 VAE 编码要求）：
-
-**数学表达式：**
-
-```
-floor(max(a, b) / 64) * 64
-```
-
-### 示例5 - 高级组合工作流：移除不可见水印 + 移除可见水印（推荐串联顺序）
-
-```
-[原始图像] → [移除不可见水印 (RAIW)] → [区域擦除可见水印 (RAIW)] → [输出]
-                                        ↑
-                                   [MASK 遮罩]
-```
-
-> **说明**：先处理不可见水印（全局重绘），再通过遮罩擦除可见水印（局部修复），既避免扩散模型放大修复痕迹，又保证遮罩区域已去除隐形水印。
 
 ---
 
