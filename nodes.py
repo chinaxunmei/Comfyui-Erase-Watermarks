@@ -21,6 +21,20 @@ from .lama_onnx_loader import LoadLaMaONNXModel
 
 log = logging.getLogger(__name__)
 
+# ==============================================================================
+# 🌟 猴子补丁：让外部包中的 region_eraser 使用本地版本（彻底离线）
+# ==============================================================================
+import remove_ai_watermarks.region_eraser as ext_region_eraser
+from .region_eraser import _get_lama_session, _get_migan_session
+
+# 直接替换外部包中的关键函数（只替换这两个就够了，因为 erase_lama 内部调用了它们）
+ext_region_eraser._get_lama_session = _get_lama_session
+ext_region_eraser._get_migan_session = _get_migan_session
+
+log.info("[ERAW] 已应用猴子补丁，外部 remove_ai_watermarks 将使用本地 region_eraser")
+
+# ==============================================================================
+
 CATEGORY = "Comfyui-erase-watermarks"
 
 _local_dir = os.path.dirname(os.path.abspath(__file__))
