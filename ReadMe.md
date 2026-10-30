@@ -27,7 +27,7 @@
 
 ## 🎯 功能概览
 
-**ComfyUI-Erase-Watermarks** 基于 [`Comfyui-Erase-Watermarks`](https://github.com/wiltodelta/ComfyUI-Comfyui-Erase-Watermarks) 核心算法进行了深度重构与功能增强，重写了完整的 ComfyUI 集成层，致力于提供更顺畅、更可控的 AI 水印擦除体验。
+**ComfyUI-Erase-Watermarks** 基于 [`remove-ai-watermarks`](https://github.com/wiltodelta/remove-ai-watermarks) 核心算法进行了深度重构与功能增强，重写了完整的 ComfyUI 集成层，致力于提供更顺畅、更可控的 AI 水印擦除体验。
 
 **相比原库，本次重构在用户体验方面做了显著优化：**
 
